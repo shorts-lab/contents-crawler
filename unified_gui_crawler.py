@@ -2,13 +2,25 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
 import threading
 import json
-from main import crawl_naver_blog
+from unified_crawler import UnifiedCrawler
 
-class NaverBlogCrawlerGUI:
+class UnifiedCrawlerGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("네이버 블로그 크롤러")
-        self.root.geometry("600x500")
+        self.root.title("통합 크롤러 - 네이버 블로그 & PANN NATE")
+        self.root.geometry("700x600")
+        
+        # 플랫폼 선택
+        platform_frame = ttk.Frame(root)
+        platform_frame.pack(pady=10)
+        
+        ttk.Label(platform_frame, text="플랫폼 선택:").pack(side=tk.LEFT, padx=5)
+        self.platform_var = tk.StringVar(value="naver_blog")
+        
+        ttk.Radiobutton(platform_frame, text="네이버 블로그", 
+                       variable=self.platform_var, value="naver_blog").pack(side=tk.LEFT, padx=10)
+        ttk.Radiobutton(platform_frame, text="PANN NATE", 
+                       variable=self.platform_var, value="pann_nate").pack(side=tk.LEFT, padx=10)
         
         # 키워드 입력
         ttk.Label(root, text="검색 키워드:").pack(pady=5)
@@ -35,7 +47,7 @@ class NaverBlogCrawlerGUI:
         
         # 결과 표시
         ttk.Label(root, text="크롤링 결과:").pack(pady=(20,5))
-        self.result_text = scrolledtext.ScrolledText(root, height=15, width=70)
+        self.result_text = scrolledtext.ScrolledText(root, height=20, width=80)
         self.result_text.pack(pady=5, padx=20, fill='both', expand=True)
         
         # 저장 버튼
@@ -43,6 +55,7 @@ class NaverBlogCrawlerGUI:
         self.save_btn.pack(pady=5)
         
         self.results = []
+        self.crawler = UnifiedCrawler()
     
     def start_crawling(self):
         keyword = self.keyword_entry.get().strip()
@@ -58,20 +71,24 @@ class NaverBlogCrawlerGUI:
             messagebox.showerror("오류", "올바른 페이지 수를 입력해주세요.")
             return
         
+        platform = self.platform_var.get()
+        
         self.start_btn.config(state='disabled')
         self.save_btn.config(state='disabled')
         self.progress.start()
-        self.status_label.config(text="크롤링 중...")
+        
+        platform_name = "네이버 블로그" if platform == "naver_blog" else "PANN NATE"
+        self.status_label.config(text=f"{platform_name} 크롤링 중...")
         self.result_text.delete(1.0, tk.END)
         
         # 별도 스레드에서 크롤링 실행
-        thread = threading.Thread(target=self.crawl_worker, args=(keyword, pages))
+        thread = threading.Thread(target=self.crawl_worker, args=(platform, keyword, pages))
         thread.daemon = True
         thread.start()
     
-    def crawl_worker(self, keyword, pages):
+    def crawl_worker(self, platform, keyword, pages):
         try:
-            self.results = crawl_naver_blog(keyword, pages)
+            self.results = self.crawler.crawl(platform, keyword, pages)
             self.root.after(0, self.crawling_complete)
         except Exception as e:
             self.root.after(0, lambda: self.crawling_error(str(e)))
@@ -80,16 +97,19 @@ class NaverBlogCrawlerGUI:
         self.progress.stop()
         self.start_btn.config(state='normal')
         self.save_btn.config(state='normal')
-        self.status_label.config(text=f"완료! {len(self.results)}개의 블로그 글을 수집했습니다.")
+        
+        platform_name = "네이버 블로그" if self.platform_var.get() == "naver_blog" else "PANN NATE"
+        self.status_label.config(text=f"완료! {platform_name}에서 {len(self.results)}개의 글을 수집했습니다.")
         
         # 결과 표시
         self.result_text.delete(1.0, tk.END)
         for i, result in enumerate(self.results, 1):
-            self.result_text.insert(tk.END, f"{'='*60}\n")
+            self.result_text.insert(tk.END, f"{'='*80}\n")
             self.result_text.insert(tk.END, f"[{i}] {result['title']}\n")
+            self.result_text.insert(tk.END, f"플랫폼: {result['source']}\n")
             self.result_text.insert(tk.END, f"URL: {result['url']}\n")
-            self.result_text.insert(tk.END, f"{'─'*60}\n")
-            content_preview = result['content'][:200].replace('\n', ' ') + '...' if len(result['content']) > 200 else result['content']
+            self.result_text.insert(tk.END, f"{'─'*80}\n")
+            content_preview = result['content'][:300].replace('\n', ' ') + '...' if len(result['content']) > 300 else result['content']
             self.result_text.insert(tk.END, f"{content_preview}\n\n")
     
     def crawling_error(self, error_msg):
@@ -104,10 +124,11 @@ class NaverBlogCrawlerGUI:
             return
         
         keyword = self.keyword_entry.get().strip()
+        platform = self.platform_var.get()
         filename = filedialog.asksaveasfilename(
             defaultextension=".json",
             filetypes=[("JSON files", "*.json")],
-            initialfile=f"naver_blog_{keyword}.json"
+            initialfile=f"{platform}_{keyword}.json"
         )
         
         if filename:
@@ -120,5 +141,5 @@ class NaverBlogCrawlerGUI:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = NaverBlogCrawlerGUI(root)
+    app = UnifiedCrawlerGUI(root)
     root.mainloop()
