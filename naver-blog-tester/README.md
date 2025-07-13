@@ -13,6 +13,8 @@ Selenium과 BeautifulSoup을 활용하여 동적 페이지도 안정적으로 �
 - JSON 파일로 저장
 - iframe 구조의 블로그 본문까지 처리 가능
 
+<img src="./img/gui.png" alt="GUI">
+
 ---
 
 ## ⚙️ 설치 방법
