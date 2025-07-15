@@ -1,12 +1,14 @@
-# 통합 크롤러 - 네이버 블로그 & PANN NATE
+# 통합 크롤러 - 네이버 블로그 & PANN NATE & 디시인사이드
 
-네이버 블로그와 PANN NATE에서 키워드 검색을 통해 게시글을 수집하는 GUI 크롤러입니다.
+네이버 블로그, PANN NATE, 디시인사이드에서 키워드 검색을 통해 게시글을 수집하는 크롤러입니다.
 
 ## 기능
 
 - **네이버 블로그 크롤링**: 키워드로 블로그 글 검색 및 본문 수집
 - **PANN NATE 크롤링**: 키워드로 게시글 검색 및 본문 수집
+- **디시인사이드 크롤링**: 키워드로 게시글 검색 및 수집
 - **GUI 인터페이스**: 사용하기 쉬운 그래픽 인터페이스
+- **CLI 인터페이스**: 명령줄 인터페이스
 - **JSON 저장**: 수집된 데이터를 JSON 파일로 저장
 
 ## 설치 방법
@@ -22,23 +24,23 @@ pip install -r requirements.txt
 
 ### GUI 버전 (권장)
 ```bash
-python unified_gui_crawler.py
+python gui-crawler.py
 ```
 
-### 콘솔 버전
+### CLI 버전
 ```bash
-python unified_crawler.py
+python cli-crawler.py
 ```
 
 ## 파일 구조
 
-- `unified_gui_crawler.py`: GUI 크롤러 메인 파일
-- `unified_crawler.py`: 크롤링 로직 및 콘솔 버전
+- `gui-crawler.py`: GUI 크롤러 (모든 서비스 통합)
+- `cli-crawler.py`: CLI 크롤러 (모든 서비스 통합)
 - `requirements.txt`: 필요한 패키지 목록
 
 ## 주요 특징
 
-1. **플랫폼 선택**: 네이버 블로그 또는 PANN NATE 선택 가능
+1. **플랫폼 선택**: 네이버 블로그, PANN NATE, 디시인사이드 선택 가능
 2. **키워드 검색**: 원하는 키워드로 검색
 3. **페이지 수 설정**: 크롤링할 페이지 수 지정
 4. **실시간 진행률**: 크롤링 진행 상황 표시
