@@ -7,48 +7,123 @@
 - **네이버 블로그 크롤링**: 키워드로 블로그 글 검색 및 본문 수집
 - **PANN NATE 크롤링**: 키워드로 게시글 검색 및 본문 수집
 - **디시인사이드 크롤링**: 키워드로 게시글 검색 및 수집
-- **GUI 인터페이스**: 사용하기 쉬운 그래픽 인터페이스
-- **CLI 인터페이스**: 명령줄 인터페이스
-- **JSON 저장**: 수집된 데이터를 JSON 파일로 저장
+- **스케줄링**: APScheduler를 통한 자동 크롤링 스케줄링
+- **REST API**: Flask 기반 API 제공
+- **Swagger 문서화**: API 자동 문서화 및 테스트 인터페이스 제공
+- **데이터베이스 저장**: 수집된 데이터를 데이터베이스에 저장
 
 ## 설치 방법
 
 1. 필요한 패키지 설치:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Chrome 브라우저와 ChromeDriver 설치 필요
+2. 데이터베이스 설정:
+
+```bash
+python setup_db.py
+```
+
+이 스크립트는 SQLite 또는 PostgreSQL 데이터베이스를 설정하고 필요한 테이블을 생성합니다.
 
 ## 사용 방법
 
-### GUI 버전 (권장)
+### 서버 실행 (API 서버)
+
 ```bash
-python gui-crawler.py
+python app.py
 ```
 
-### CLI 버전
+또는 Gunicorn으로 실행:
+
 ```bash
-python cli-crawler.py
+gunicorn app:app
 ```
+
+### 명령줄 인터페이스 사용
+
+```bash
+python cli.py --platform naver --keyword "검색어" --pages 3 --output "results.json"
+```
+
+### GUI 인터페이스 사용
+
+```bash
+python gui.py
+```
+
+### 테스트 실행
+
+```bash
+python -m unittest discover tests
+```
+
+### Swagger UI
+
+API 문서화와 테스트를 위한 Swagger UI를 제공합니다:
+
+```
+http://localhost:5001/swagger/
+```
+
+Swagger UI를 통해 다음을 할 수 있습니다:
+
+- API 엔드포인트 문서 확인
+- 요청/응답 모델 확인
+- API 직접 테스트
+
+## Cloudtype 배포
+
+이 프로젝트는 Cloudtype에 배포할 수 있도록 구성되어 있습니다.
+
+1. Cloudtype 계정 생성 및 로그인
+2. 새 프로젝트 생성
+3. GitHub 저장소 연결
+4. 배포 설정:
+   - 런타임: Python
+   - 시작 명령어: `gunicorn app:app`
+   - 포트: 5001
+   - 환경 변수 설정: DATABASE_URL 등
 
 ## 파일 구조
 
-- `gui-crawler.py`: GUI 크롤러 (모든 서비스 통합)
-- `cli-crawler.py`: CLI 크롤러 (모든 서비스 통합)
-- `requirements.txt`: 필요한 패키지 목록
-
-## 주요 특징
-
-1. **플랫폼 선택**: 네이버 블로그, PANN NATE, 디시인사이드 선택 가능
-2. **키워드 검색**: 원하는 키워드로 검색
-3. **페이지 수 설정**: 크롤링할 페이지 수 지정
-4. **실시간 진행률**: 크롤링 진행 상황 표시
-5. **결과 미리보기**: 수집된 데이터 즉시 확인
-6. **JSON 저장**: 결과를 JSON 파일로 저장
-
-## 주의사항
-
-- 웹사이트의 이용약관을 준수하여 사용하세요
-- 과도한 요청으로 서버에 부하를 주지 않도록 주의하세요
-- 개인정보가 포함된 데이터 처리 시 주의하세요
+```
+shorts-maker/
+├── app.py                  # 메인 Flask 애플리케이션
+├── cli.py                  # 명령줄 인터페이스 진입점
+├── gui.py                  # GUI 인터페이스 진입점
+├── requirements.txt        # 필요한 패키지 목록
+├── Procfile               # Cloudtype 배포용 설정 파일
+├── .env                   # 환경 변수 설정 파일
+├── setup_db.py            # 데이터베이스 설정 스크립트
+├── static/                # 정적 파일 디렉토리
+│   └── swagger.json       # Swagger API 문서
+├── tests/                 # 테스트 디렉토리
+│   ├── __init__.py        # 테스트 패키지 초기화
+│   └── test_crawlers.py   # 크롤러 테스트
+└── src/                   # 소스 코드 디렉토리
+    ├── api/               # API 관련 모듈
+    │   ├── __init__.py    # API 패키지 초기화
+    │   ├── routes.py      # API 라우트 정의
+    │   └── swagger.py     # Swagger 설정
+    ├── crawlers/          # 크롤러 모듈
+    │   ├── __init__.py    # 크롤러 패키지 초기화
+    │   ├── base_crawler.py # 기본 크롤러 클래스
+    │   ├── naver_crawler.py # 네이버 블로그 크롤러
+    │   ├── pann_crawler.py # PANN NATE 크롤러
+    │   └── dcinside_crawler.py # 디시인사이드 크롤러
+    ├── interfaces/        # 사용자 인터페이스 모듈
+    │   ├── __init__.py    # 인터페이스 패키지 초기화
+    │   ├── cli.py         # 명령줄 인터페이스
+    │   └── gui.py         # GUI 인터페이스
+    ├── models/            # 데이터베이스 모델
+    │   ├── __init__.py    # 모델 패키지 초기화
+    │   ├── database.py    # 데이터베이스 설정
+    │   └── content.py     # 컨텐츠 모델
+    └── utils/             # 유틸리티 모듈
+        ├── __init__.py    # 유틸리티 패키지 초기화
+        ├── browser.py     # 브라우저 관련 유틸리티
+        └── config.py      # 설정 관련 유틸리티
+```
