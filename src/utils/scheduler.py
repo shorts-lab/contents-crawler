@@ -9,10 +9,16 @@ def save_crawled_data(data, platform):
     """Save crawled data to database"""
     saved_count = 0
     for item in data:
+        url = item.get('url', '')
+        # Skip items with 'javascript' or 'addc' in the URL
+        if 'javascript' in url or 'addc' in url:
+            logger.info(f"Skipping item with URL: {url}")
+            continue
+            
         content = Content(
             title=item.get('title', 'No Title'),
             content=item.get('content', '') or item.get('text', ''),
-            url=item.get('url', ''),
+            url=url,
             author=item.get('author', ''),
             platform=item.get('platform', platform)
         )
