@@ -49,8 +49,7 @@ class NaverCrawler(BaseCrawler):
                             "title": title,
                             "url": link,
                             "content": content,
-                            "platform": "naver",
-                            "author": ""
+                            "platform": "naver"
                         })
                     except Exception as e:
                         logger.error(f"Error extracting content for '{title}': {str(e)}")

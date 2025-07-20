@@ -45,8 +45,7 @@ class PannCrawler(BaseCrawler):
                             "title": title,
                             "url": post_url,
                             "content": content,
-                            "platform": "pann",
-                            "author": ""
+                            "platform": "pann"
                         })
                     except Exception as e:
                         logger.error(f"Error extracting content for '{title}': {str(e)}")

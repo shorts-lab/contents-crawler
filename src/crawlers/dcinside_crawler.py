@@ -51,8 +51,7 @@ class DCInsideCrawler(BaseCrawler):
                                     'title': title,
                                     'url': link,
                                     'content': content,
-                                    'platform': 'dcinside',
-                                    'author': ''
+                                    'platform': 'dcinside'
                                 })
                             except Exception as e:
                                 logger.error(f"Error extracting content for '{title}': {str(e)}")
@@ -61,8 +60,7 @@ class DCInsideCrawler(BaseCrawler):
                                     'title': title,
                                     'url': link,
                                     'content': title,
-                                    'platform': 'dcinside',
-                                    'author': ''
+                                    'platform': 'dcinside'
                                 })
                 
                 # Add random delay between requests

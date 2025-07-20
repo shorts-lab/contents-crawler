@@ -19,7 +19,6 @@ def save_crawled_data(data, platform):
             title=item.get('title', 'No Title'),
             content=item.get('content', '') or item.get('text', ''),
             url=url,
-            author=item.get('author', ''),
             platform=item.get('platform', platform)
         )
         db.session.add(content)
