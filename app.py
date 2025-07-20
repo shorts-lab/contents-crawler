@@ -55,20 +55,22 @@ def run_with_app_context(func, *args, **kwargs):
 
 # Setup initial scheduler
 def setup_scheduler():
-    from src.utils.scheduler import run_crawler
+    from src.utils.scheduler import run_crawler_job
     
     logger.info("Setting up scheduled crawler to run every 5 minutes")
+    
+    # Schedule combined crawler job that includes both DCInside and PANN
     job = scheduler.add_job(
         func=run_with_app_context,
-        args=[run_crawler, 'dcinside', '연애', 1],
-        id='default_dcinside',
+        args=[run_crawler_job, 'dcinside', '연애', 1, True],  # True for include_pann
+        id='default_crawler',
         trigger='interval',
         minutes=5,
         replace_existing=True,
         misfire_grace_time=None  # Always run, even if misfired
     )
     
-    logger.info(f"Next scheduled run at: {job.next_run_time}")
+    logger.info(f"Next scheduled crawler run at: {job.next_run_time}")
 
 # Register shutdown function
 def shutdown_scheduler(exception=None):

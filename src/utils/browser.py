@@ -21,8 +21,32 @@ def get_chrome_driver():
         options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
         
         # For Cloudtype deployment
-        chrome_service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=chrome_service, options=options)
+        try:
+            # Try to use ChromeDriverManager with specific path
+            driver_path = ChromeDriverManager().install()
+            # Make sure we're not using THIRD_PARTY_NOTICES file
+            if "THIRD_PARTY_NOTICES" in driver_path:
+                # Get the directory and use the actual chromedriver
+                driver_dir = os.path.dirname(driver_path)
+                for file in os.listdir(driver_dir):
+                    if file.startswith("chromedriver") and not file.endswith(".zip") and not "NOTICES" in file:
+                        driver_path = os.path.join(driver_dir, file)
+                        break
+            
+            chrome_service = Service(driver_path)
+            driver = webdriver.Chrome(service=chrome_service, options=options)
+        except Exception as e:
+            logger.warning(f"Failed to use ChromeDriverManager: {str(e)}. Trying alternative approach.")
+            # Fallback to direct path for Mac M1/M2
+            if os.path.exists("/usr/local/bin/chromedriver"):
+                chrome_service = Service("/usr/local/bin/chromedriver")
+            elif os.path.exists("/opt/homebrew/bin/chromedriver"):
+                chrome_service = Service("/opt/homebrew/bin/chromedriver")
+            else:
+                # Last resort - try without specifying path
+                chrome_service = Service()
+            
+            driver = webdriver.Chrome(service=chrome_service, options=options)
         
         # Set page load timeout
         driver.set_page_load_timeout(30)

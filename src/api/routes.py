@@ -1,6 +1,6 @@
 from flask import jsonify, request
 import logging
-from ..utils.scheduler import run_crawler
+from ..utils.scheduler import run_crawler_job
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +16,19 @@ def register_routes(app, scheduler):
         pages = data.get('pages', 1)
         
         try:
-            # Use the same function that the scheduler uses
-            saved_count = run_crawler(platform, keyword, pages)
+            # Use the centralized crawler function
+            if platform == 'all':
+                # Crawl dcinside with PANN
+                results, total_count = run_crawler_job('dcinside', keyword, pages, include_pann=True)
+            else:
+                # Crawl specified platform with PANN included by default
+                results, total_count = run_crawler_job(platform, keyword, pages)
             
             return jsonify({
                 'status': 'success',
-                'message': f'Successfully crawled and saved {saved_count} items from {platform}',
-                'count': saved_count
+                'message': f'Successfully crawled and saved {total_count} items',
+                'count': total_count,
+                'results': results
             })
         except Exception as e:
             logger.error(f"Error during crawling: {str(e)}")

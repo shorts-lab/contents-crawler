@@ -22,8 +22,7 @@ class DCInsideCrawler(BaseCrawler):
             params = {
                 'id': 'loveconsultation',
                 'page': page,
-                's_type': 'search_subject_memo',
-                's_keyword': self.keyword
+                'exception_mode': 'recommend'
             }
             
             try:
@@ -46,13 +45,25 @@ class DCInsideCrawler(BaseCrawler):
                             link = "https://gall.dcinside.com" + href if href.startswith('/') else href
                             logger.info(f"Collecting post: {title}")
                             
-                            results.append({
-                                'title': title,
-                                'url': link,
-                                'content': title,  # DCInside doesn't allow easy content extraction
-                                'platform': 'dcinside',
-                                'author': ''
-                            })
+                            try:
+                                content = self._extract_content(link, headers)
+                                results.append({
+                                    'title': title,
+                                    'url': link,
+                                    'content': content,
+                                    'platform': 'dcinside',
+                                    'author': ''
+                                })
+                            except Exception as e:
+                                logger.error(f"Error extracting content for '{title}': {str(e)}")
+                                # Fallback to using title as content if extraction fails
+                                results.append({
+                                    'title': title,
+                                    'url': link,
+                                    'content': title,
+                                    'platform': 'dcinside',
+                                    'author': ''
+                                })
                 
                 # Add random delay between requests
                 time.sleep(random.uniform(1, 2))
@@ -69,3 +80,21 @@ class DCInsideCrawler(BaseCrawler):
         response = requests.get(url, params=params, headers=headers, timeout=10)
         response.raise_for_status()
         return response
+        
+    @retry(max_attempts=2)
+    def _extract_content(self, url, headers):
+        """Extract content from a post detail page"""
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            content_div = soup.select_one('.write_div') or soup.select_one('.usertxt')
+            
+            if not content_div:
+                return "(본문을 찾을 수 없습니다)"
+                
+            return content_div.get_text(separator="\n").strip()
+        except Exception as e:
+            logger.error(f"Error extracting content from {url}: {str(e)}")
+            return "(본문 추출 중 오류 발생)"
