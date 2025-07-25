@@ -1,4 +1,4 @@
-name: Dev Deployment
+name: Deploy
 
 on:
   schedule:
@@ -15,12 +15,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
+      - name: Connect deploy key
+        uses: cloudtype-github-actions/connect@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          ghtoken: ${{ secrets.GHP_TOKEN }}
       - name: Deploy
         uses: cloudtype-github-actions/deploy@v1
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          ghtoken: ${{ secrets.GHP_TOKEN }}
           project: aptheparker/free
           stage: main
           yaml: >
@@ -35,12 +38,11 @@ jobs:
               ports: "5001"
               start: gunicorn -b 0.0.0.0:5001 app:app
               buildenv: []
-
             context:
               git:
-                url: https://github.com/${{ github.repository }}.git
+                url: git@github.com:${{ github.repository }}.git
                 ref: ${{ github.ref }}
-              preset: flask-python
+              preset: python-flask
 
   deploy-db:
     name: Contents Crawler DB Deployment
@@ -48,24 +50,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
+      - name: Connect deploy key
+        uses: cloudtype-github-actions/connect@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          ghtoken: ${{ secrets.GHP_TOKEN }}
       - name: Deploy
         uses: cloudtype-github-actions/deploy@v1
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          ghtoken: ${{ secrets.GHP_TOKEN }}
           project: aptheparker/free
           stage: main
           yaml: |
             name: contents-crawler-db
-
             app: postgresql@16
-
             options:
               rootusername: contents-crawler
               rootpassword: ${{ secrets.DB_ROOT_PASSWORD }}
-              database: postgres
-
+              database: "postgres"
             context:
               preset: postgresql
               git:
