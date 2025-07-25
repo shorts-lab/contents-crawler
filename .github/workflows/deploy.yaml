@@ -2,7 +2,9 @@ name: Deployment
 
 on:
   schedule:
-    - cron: '0 3-9 * * *'
+    # UTC
+    - cron: '0 18-23 * * *' # 3 AM–8 AM KST
+    - cron: '0 0 * * *' # 9 AM KST
   push:
     branches:
       - main
