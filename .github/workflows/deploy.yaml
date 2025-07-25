@@ -20,7 +20,6 @@ jobs:
         uses: cloudtype-github-actions/deploy@v1
         with:
           token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          ghtoken: ${{ secrets.GHP_TOKEN }}
           project: aptheparker/free
           stage: main
           yaml: >
@@ -41,33 +40,3 @@ jobs:
                 url: https://github.com/${{ github.repository }}.git
                 ref: ${{ github.ref }}
               preset: flask-python
-
-  deploy-db:
-    name: Contents Crawler DB Deployment
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Deploy
-        uses: cloudtype-github-actions/deploy@v1
-        with:
-          token: ${{ secrets.CLOUDTYPE_TOKEN }}
-          ghtoken: ${{ secrets.GHP_TOKEN }}
-          project: aptheparker/free
-          stage: main
-          yaml: |
-            name: contents-crawler-db
-
-            app: postgresql@16
-
-            options:
-              rootusername: contents-crawler
-              rootpassword: ${{ secrets.DB_ROOT_PASSWORD }}
-              database: postgres
-
-            context:
-              preset: postgresql
-              git:
-                url: git@github.com:${{ github.repository }}.git
-                ref: ${{ github.ref }}
