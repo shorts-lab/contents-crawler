@@ -42,7 +42,7 @@ gunicorn app:app
 
 ### Swagger UI 접속
 
-API 문서화 및 테스트: http://localhost:5001/swagger/
+API 문서화 및 테스트: http://localhost:5001/docs
 
 ## 배포
 
